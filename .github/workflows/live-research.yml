@@ -1,0 +1,23 @@
+name: Live Integration Research
+on:
+  push:
+    paths:
+      - 'scripts/live_integration.py'
+      - '.github/workflows/live-research.yml'
+  workflow_dispatch:
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python scripts/live_integration.py
+      - name: Upload real HTTP audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aftertone-live-research
+          path: artifacts/integration/*.json
