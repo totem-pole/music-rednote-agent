@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+.pytest_cache/
+.venv/
+.DS_Store
+secrets/
+cookies/
+session/
+*.sqlite3
+*.db
+research/
+!research/.gitkeep
