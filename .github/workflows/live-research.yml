@@ -17,9 +17,12 @@ jobs:
       - run: python scripts/live_integration.py
       - run: python scripts/live_articles.py
       - run: python -m scripts.live_editorial
+      - run: python scripts/full_source_sweep.py
       - name: Upload real HTTP audit
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: aftertone-live-research
-          path: artifacts/integration/*.json
+          path: |
+            artifacts/integration/*.json
+            artifacts/full-sweep/*.json
