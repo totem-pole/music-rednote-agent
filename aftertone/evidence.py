@@ -7,9 +7,14 @@ from urllib.parse import urlsplit
 from urllib.request import Request, build_opener, HTTPRedirectHandler
 from .engine import safe_url, stamp
 
-class NoRedirect(HTTPRedirectHandler):
-    def redirect_request(self, *args, **kwargs):
-        raise ValueError("redirect blocked: review destination manually")
+class ApprovedRedirect(HTTPRedirectHandler):
+    def __init__(self, allow_hosts):
+        super().__init__();self.allow_hosts=allow_hosts;self.count=0
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        self.count+=1
+        if self.count>3:raise ValueError("too many redirects")
+        permitted_url(newurl,self.allow_hosts)
+        return super().redirect_request(req,fp,code,msg,headers,newurl)
 
 class ArticleParser(HTMLParser):
     """Extract visible text while skipping page chrome and embedded scripts."""
@@ -43,7 +48,7 @@ def retrieve_article(url,allow_hosts,fetch=None):
     permitted_url(url,allow_hosts)
     if fetch is None:
         def fetch(value):
-            opener=build_opener(NoRedirect)
+            opener=build_opener(ApprovedRedirect(allow_hosts))
             with opener.open(Request(value,headers={"User-Agent":"AFTERTONE-research/0.6","Accept":"text/html"}),timeout=12) as r:
                 if "text/html" not in r.headers.get("Content-Type","").lower():raise ValueError("not HTML")
                 raw=r.read(4000001)
