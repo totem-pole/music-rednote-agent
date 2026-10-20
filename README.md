@@ -26,3 +26,6 @@ This repository does not vendor either upstream project; audit upstream licensin
 - Future: analytics and a public album archive if the initial month succeeds.
 
 No unattended login, credential collection or posting. Copyright clearance is required for album cover uploads.
+
+## Current output scope
+**Text only**: researched album review, title, Xiaohongshu body, hashtags, source ledger, QA report. Visual cards and layout generation are out of scope unless explicitly requested again.
