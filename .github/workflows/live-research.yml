@@ -11,9 +11,12 @@ on:
 jobs:
   live:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -21,8 +24,12 @@ jobs:
       - run: python scripts/live_articles.py
       - run: python -m scripts.live_editorial
       - run: python scripts/full_source_sweep.py
-      - name: Run all eight query rounds through public search RSS
-        run: python -m aftertone.full_research --mode bing-rss --output artifacts/eight-round
+      - name: Install Exa MCP CLI
+        run: |
+          npm install -g mcporter
+          mcporter config add exa https://mcp.exa.ai/mcp --scope project
+      - name: Run all eight query rounds through Exa semantic search
+        run: python -m aftertone.full_research --mode exa --output artifacts/eight-round
       - name: Capture full text from approved hosts and create evidence candidates
         run: python -m aftertone.capture --root artifacts/eight-round --limit 12
       - name: Upload real HTTP audit
