@@ -18,6 +18,8 @@ jobs:
       - run: python scripts/live_articles.py
       - run: python -m scripts.live_editorial
       - run: python scripts/full_source_sweep.py
+      - name: Execute search protocol with available metadata providers
+        run: python -m aftertone.full_research --mode metadata --output artifacts/eight-round
       - name: Upload real HTTP audit
         if: always()
         uses: actions/upload-artifact@v4
@@ -26,3 +28,4 @@ jobs:
           path: |
             artifacts/integration/*.json
             artifacts/full-sweep/*.json
+            artifacts/eight-round/**/*.json
