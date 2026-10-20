@@ -1,0 +1,22 @@
+name: Exa MCP Probe
+on:
+  push:
+    paths:
+      - 'scripts/probe_exa.py'
+      - '.github/workflows/exa-probe.yml'
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm install -g mcporter
+      - run: mcporter config add exa https://mcp.exa.ai/mcp --scope project
+      - run: python scripts/probe_exa.py
