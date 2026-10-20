@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'aftertone/capture.py'
+      - 'aftertone/evidence.py'
       - '.github/workflows/capture-acceptance.yml'
   workflow_dispatch:
 permissions:
