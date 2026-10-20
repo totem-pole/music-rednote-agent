@@ -3,6 +3,9 @@ on:
   push:
     paths:
       - 'scripts/live_integration.py'
+      - 'aftertone/full_research.py'
+      - 'aftertone/evidence.py'
+      - 'aftertone/provenance.py'
       - '.github/workflows/live-research.yml'
   workflow_dispatch:
 jobs:
