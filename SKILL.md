@@ -9,12 +9,12 @@ An editor-led music criticism desk, NOT an automatic praise generator. Each day 
 
 ## Mandatory workflow
 1. Ask for / obtain album artist, title, edition, selection rationale, editor's own listening notes, and optional release date. Do not invent personal experience if notes are absent.
-2. Read `skills/music-critic/SKILL.md` and `references/source-policy.md`; perform multi-pass research, record source URLs and inaccessible channels.
+2. Read `skills/music-critic/SKILL.md`, `skills/music-critic/research-playbook.md`, `skills/music-critic/music-analysis.md` and `references/source-policy.md`; perform multi-pass research with source-coverage report, sonic evidence matrix and unavailable-channel log.
 3. Create `research/<date>/<slug>/sources.json`, `research.md` and `claim-ledger.json`. Mark FACT, QUOTE, INTERPRETATION, UNVERIFIED separately.
 4. Analyze composition, sound, lyrics, production, track order, career context, historical/social background and critics' disagreements. Be explicit when direct listening is unavailable.
-5. Read `references/editorial-voice.md` and draft the Xiaohongshu note. Writing should be natural, self-questioning, concrete, at times lightly wry; never fabricate anecdotes or claim to have heard anything the agent hasn't.
+5. Read `references/editorial-voice.md` and `references/editorial-qa-v2.md`; insist on three sourced musical anchors before a review; draft the Xiaohongshu note. Writing should be natural, self-questioning, concrete, at times lightly wry; never fabricate anecdotes or claim to have heard anything the agent hasn't.
 6. Run `python scripts/validate_package.py research/<date>/<slug>` before approval. Run a source-dependent originality review: lexical similarity and manual semantic/argument-structure inspection against retrieved criticism. Passing heuristics does NOT certify copyright compliance.
-7. Editorial approval: the human editor must sign off factual claims, interpretation, cover permission, title, tags and final copy. Record `approved_by_human: true` only after explicit approval.
+7. Read `skills/editorial-layout/SKILL.md`, produce a 3:4 optional minimal typography carousel from approved text with `scripts/build_cards.py`; original cover is the first image only when rights permit. Browser-render HTML to images and visually inspect before presenting. Editorial approval: the human editor must sign off factual claims, interpretation, cover permission, title, tags and final copy. Record `approved_by_human: true` only after explicit approval.
 8. Xiaohongshu: DRAFT ONLY unless the human explicitly approves publication in the current run and an authorized supported publisher integration is available. Never exfiltrate cookies or credentials. No hidden background publication.
 
 ## Deliverables per album
