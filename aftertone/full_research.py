@@ -6,17 +6,28 @@ are tagged CONFIG_REQUIRED, not presented as executed.
 """
 import argparse,json,os,time,datetime
 from pathlib import Path
+import urllib.request,urllib.parse,xml.etree.ElementTree as ET
+
 from urllib.error import HTTPError,URLError
 from .engine import make_plan,wiki,mb,brave,sources_from,save,stamp
 from .evidence import retrieve_article,claim_candidates,similarity_report
 from .engine import corroboration,conflict
 
 ALBUMS=[("chen","陈淑桦","一生守候"),("say-sue-me","Say Sue Me","Where We Were Together")]
+def bing_rss(query):
+    """Public search RSS, optional and untrusted; may be blocked. Never spoof successful search."""
+    url="https://www.bing.com/search?"+urllib.parse.urlencode({"q":query,"format":"rss"})
+    req=urllib.request.Request(url,headers={"User-Agent":"AFTERTONE/0.8 research search client","Accept":"application/rss+xml,application/xml"})
+    with urllib.request.urlopen(req,timeout=10) as res:
+        raw=res.read(500000)
+    root=ET.fromstring(raw)
+    return [{"url":i.findtext("link",""),"title":i.findtext("title",""),"snippet":i.findtext("description",""),"publisher":"Bing RSS","role":"SEARCH_LEAD"} for i in root.findall(".//item") if i.findtext("link")]
+
 def execute_queries(artist,album,search=None,pause=.25):
     plan=make_plan(artist,album)
     discovered={}; logs=[]
     for task in plan["tasks"]:
-        kind=task["round"]; q=task["query"]; provider="brave" if search else "metadata"
+        kind=task["round"]; q=task["query"]; provider="web-search" if search else "metadata"
         try:
             if search:rows=search(q)
             elif "site:wikipedia.org" in q:rows=wiki(f'"{artist}" "{album}"',"zh" if artist=="陈淑桦" else "en")
@@ -62,9 +73,9 @@ def run_all(folder,search=None):
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--output",default="artifacts/eight-round")
-    p.add_argument("--mode",choices=["metadata","brave"],default="metadata")
+    p.add_argument("--mode",choices=["metadata","brave","bing-rss"],default="metadata")
     args=p.parse_args()
     key=os.getenv("BRAVE_SEARCH_API_KEY","")
     if args.mode=="brave" and not key:raise SystemExit("BRAVE_SEARCH_API_KEY required for eight-round full web search; NOT claiming success")
-    run_all(args.output,search=(lambda q:brave(q,key)) if args.mode=="brave" else None)
+    run_all(args.output,search=(lambda q:brave(q,key)) if args.mode=="brave" else (bing_rss if args.mode=="bing-rss" else None))
 if __name__=="__main__":main()
