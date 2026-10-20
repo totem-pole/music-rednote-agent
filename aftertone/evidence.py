@@ -85,7 +85,7 @@ def quality_gate(claims,sources,sonic_notes,editor_approved=False):
             ids=c.get("source_ids",[])
             if not ids or any(i not in idx or idx[i].get("status")!="READ" for i in ids):
                 failures.append("unsupported factual claim: "+str(c.get("id")))
-    grounded=[n for n in sonic_notes if n.get("track") and n.get("specific_feature") and n.get("evidence_type") in ("EDITOR_LISTENING","ATTRIBUTED_REVIEW","OFFICIAL_CREDIT") and n.get("evidence_ref")]
+    grounded=[n for n in sonic_notes if n.get("track") and n.get("specific_feature") and n.get("evidence_type") in ("ATTRIBUTED_REVIEW","OFFICIAL_CREDIT") and n.get("evidence_ref") in idx and idx[n["evidence_ref"]].get("status")=="READ" or n.get("track") and n.get("specific_feature") and n.get("evidence_type")=="EDITOR_LISTENING" and n.get("editor_signature") and n.get("evidence_ref")]
     if len({n["track"] for n in grounded})<3:failures.append("fewer than 3 tracks with grounded sonic detail")
     if not editor_approved:failures.append("human approval missing")
     return {"ready_for_publication":not failures,"failures":failures,"supported_tracks":len({n["track"] for n in grounded})}
