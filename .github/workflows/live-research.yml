@@ -16,7 +16,7 @@ jobs:
           python-version: '3.11'
       - run: python scripts/live_integration.py
       - run: python scripts/live_articles.py
-      - run: python scripts/live_editorial.py
+      - run: python -m scripts.live_editorial
       - name: Upload real HTTP audit
         if: always()
         uses: actions/upload-artifact@v4
