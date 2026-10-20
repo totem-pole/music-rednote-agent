@@ -4,7 +4,7 @@ No browser credential handling, no RYM evasion. Uses an optional Brave API key; 
 Wikipedia/MusicBrainz public searches cover only the supported tasks. All unsupported tasks
 are tagged CONFIG_REQUIRED, not presented as executed.
 """
-import argparse,json,os,time,datetime
+import argparse,json,os,time,datetime,re,unicodedata
 from pathlib import Path
 import urllib.request,urllib.parse,xml.etree.ElementTree as ET
 
@@ -23,6 +23,15 @@ def bing_rss(query):
     root=ET.fromstring(raw)
     return [{"url":i.findtext("link",""),"title":i.findtext("title",""),"snippet":i.findtext("description",""),"publisher":"Bing RSS","role":"SEARCH_LEAD"} for i in root.findall(".//item") if i.findtext("link")]
 
+def relevant_result(row, artist, album):
+    """Reject obviously unrelated search pages; keep only album/artist name matches.
+    This is a *candidate* filter, not a source credibility judgment.
+    """
+    hay=unicodedata.normalize("NFKC",(str(row.get("title",""))+" "+str(row.get("snippet",""))+" "+str(row.get("url",""))).lower())
+    a=unicodedata.normalize("NFKC",artist).lower()
+    b=unicodedata.normalize("NFKC",album).lower()
+    return a in hay or b in hay
+
 def execute_queries(artist,album,search=None,pause=.25):
     plan=make_plan(artist,album)
     discovered={}; logs=[]
@@ -36,11 +45,12 @@ def execute_queries(artist,album,search=None,pause=.25):
                 task["status"]="CONFIG_REQUIRED"
                 logs.append({"id":task["id"],"round":kind,"query":q,"provider":"brave","status":"CONFIG_REQUIRED"})
                 continue
-            batch=sources_from(rows,task["id"])
+            relevant=[x for x in rows if relevant_result(x,artist,album)]
+            batch=sources_from(relevant,task["id"])
             task["status"]="SUCCESS" if batch else "NO_RESULTS"
             task["results"]=[x["id"] for x in batch]
             for row in batch:discovered[row["url"]]=row
-            logs.append({"id":task["id"],"round":kind,"query":q,"provider":provider,"status":task["status"],"result_count":len(batch)})
+            logs.append({"id":task["id"],"round":kind,"query":q,"provider":provider,"status":task["status"],"result_count":len(batch),"raw_result_count":len(rows)})
         except (HTTPError,URLError,ValueError,TimeoutError,KeyError,TypeError) as exc:
             task["status"]="ERROR"
             logs.append({"id":task["id"],"round":kind,"query":q,"provider":provider,"status":"ERROR","error":str(exc)[:180]})
