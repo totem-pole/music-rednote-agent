@@ -9,3 +9,6 @@ Publisher integrations must be modular and disabled by default. Research permiss
 Use original album artwork only under appropriate rights/use permission. Do not upload full music files. Do not put personal essays, credentials or private draft archives in a public repo.
 
 Weekly metrics: successful researched albums, sources per album and source diversity, editorial correction count, time spent, editorial approval rate, notes' engagement and account health; do not fabricate outcomes or purchase engagement.
+
+## Current editorial decision (2026-10-20)
+Text-only output. No graphics, image cards, cover-generation or visual layout steps. Publisher preparation exports title, body, tags and optional references only. Do not schedule or publish without explicit per-post approval.
