@@ -1,0 +1,70 @@
+"""Eight-round executed research with auditable query attempts and explicit source limitations.
+
+No browser credential handling, no RYM evasion. Uses an optional Brave API key; otherwise
+Wikipedia/MusicBrainz public searches cover only the supported tasks. All unsupported tasks
+are tagged CONFIG_REQUIRED, not presented as executed.
+"""
+import argparse,json,os,time,datetime
+from pathlib import Path
+from urllib.error import HTTPError,URLError
+from .engine import make_plan,wiki,mb,brave,sources_from,save,stamp
+from .evidence import retrieve_article,claim_candidates,similarity_report
+from .engine import corroboration,conflict
+
+ALBUMS=[("chen","陈淑桦","一生守候"),("say-sue-me","Say Sue Me","Where We Were Together")]
+def execute_queries(artist,album,search=None,pause=.25):
+    plan=make_plan(artist,album)
+    discovered={}; logs=[]
+    for task in plan["tasks"]:
+        kind=task["round"]; q=task["query"]; provider="brave" if search else "metadata"
+        try:
+            if search:rows=search(q)
+            elif "site:wikipedia.org" in q:rows=wiki(f'"{artist}" "{album}"',"zh" if artist=="陈淑桦" else "en")
+            elif "site:musicbrainz.org" in q:rows=mb(artist,album)
+            else:
+                task["status"]="CONFIG_REQUIRED"
+                logs.append({"id":task["id"],"round":kind,"query":q,"provider":"brave","status":"CONFIG_REQUIRED"})
+                continue
+            batch=sources_from(rows,task["id"])
+            task["status"]="SUCCESS" if batch else "NO_RESULTS"
+            task["results"]=[x["id"] for x in batch]
+            for row in batch:discovered[row["url"]]=row
+            logs.append({"id":task["id"],"round":kind,"query":q,"provider":provider,"status":task["status"],"result_count":len(batch)})
+        except (HTTPError,URLError,ValueError,TimeoutError,KeyError,TypeError) as exc:
+            task["status"]="ERROR"
+            logs.append({"id":task["id"],"round":kind,"query":q,"provider":provider,"status":"ERROR","error":str(exc)[:180]})
+        if pause:time.sleep(pause)
+    return {"plan":plan,"queries":logs,"sources":list(discovered.values())}
+
+def score_coverage(pack):
+    tasks=pack["queries"];successful=[r for r in tasks if r["status"] in ("SUCCESS","NO_RESULTS")]
+    return {"planned":len(tasks),"executed":len(successful)+sum(x["status"]=="ERROR" for x in tasks),
+      "config_required":sum(x["status"]=="CONFIG_REQUIRED" for x in tasks),
+      "by_round":{r:{"attempted":sum(x["round"]==r and x["status"]!="CONFIG_REQUIRED" for x in tasks),
+                       "success":sum(x["round"]==r and x["status"]=="SUCCESS" for x in tasks)}
+                  for r in sorted({x["round"] for x in tasks})},
+      "unique_source_leads":len(pack["sources"]),
+      "eight_rounds_executed":all(any(x["round"]==r and x["status"]!="CONFIG_REQUIRED" for x in tasks)
+                                 for r in {x["round"] for x in tasks})}
+
+def run_all(folder,search=None):
+    out={}
+    for slug,artist,album in ALBUMS:
+        pack=execute_queries(artist,album,search=search)
+        pack["coverage"]=score_coverage(pack)
+        dest=Path(folder)/slug
+        for k in ("plan","queries","sources","coverage"):save(dest/(k+".json"),pack[k])
+        out[slug]=pack["coverage"]
+        print(slug,json.dumps(pack["coverage"],ensure_ascii=False),flush=True)
+    save(Path(folder)/"summary.json",out)
+    return out
+
+def main():
+    p=argparse.ArgumentParser()
+    p.add_argument("--output",default="artifacts/eight-round")
+    p.add_argument("--mode",choices=["metadata","brave"],default="metadata")
+    args=p.parse_args()
+    key=os.getenv("BRAVE_SEARCH_API_KEY","")
+    if args.mode=="brave" and not key:raise SystemExit("BRAVE_SEARCH_API_KEY required for eight-round full web search; NOT claiming success")
+    run_all(args.output,search=(lambda q:brave(q,key)) if args.mode=="brave" else None)
+if __name__=="__main__":main()
