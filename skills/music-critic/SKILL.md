@@ -4,7 +4,7 @@ description: Evidence-driven album research and criticism across primary sources
 ---
 # Music Critic
 
-## Goal
+Before research, read `skills/music-critic/source-discovery.md` and execute its eight round search protocol. Save audit records and do not treat RYM or Wikipedia as verified facts on their own.\n\n## Goal
 Create an original, defensible interpretation of an album's sounds and social/cultural place. Do NOT equate the number of search hits with research quality.
 
 ## Passes
