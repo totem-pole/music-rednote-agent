@@ -33,7 +33,7 @@ def main():
   outcomes={}
   for k,url in sources(artist,album,lang).items():
    r=fetch(url);outcomes[k]=summarize(k,r);outcomes[k]["url"]=url
-   print(slug,k,r["status"],r.get("http"),outcomes[k].get("match_count"),flush=True)
+   print(slug,k,r["status"],r.get("http"),outcomes[k].get("match_count"),r.get("error","")[:160],flush=True)
    time.sleep(1.1)
   report={"artist":artist,"album":album,"generated_at":datetime.datetime.now(datetime.timezone.utc).isoformat(),"results":outcomes,"editorial_ready":False}
   (BASE/(slug+".json")).write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
