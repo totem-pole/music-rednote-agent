@@ -83,9 +83,10 @@ def run_all(folder,search=None):
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--output",default="artifacts/eight-round")
-    p.add_argument("--mode",choices=["metadata","brave","bing-rss"],default="metadata")
+    p.add_argument("--mode",choices=["metadata","brave","bing-rss","exa"],default="metadata")
     args=p.parse_args()
     key=os.getenv("BRAVE_SEARCH_API_KEY","")
     if args.mode=="brave" and not key:raise SystemExit("BRAVE_SEARCH_API_KEY required for eight-round full web search; NOT claiming success")
-    run_all(args.output,search=(lambda q:brave(q,key)) if args.mode=="brave" else (bing_rss if args.mode=="bing-rss" else None))
+    from .exa import search as exa_search
+    run_all(args.output,search=(lambda q:brave(q,key)) if args.mode=="brave" else (bing_rss if args.mode=="bing-rss" else exa_search if args.mode=="exa" else None))
 if __name__=="__main__":main()
