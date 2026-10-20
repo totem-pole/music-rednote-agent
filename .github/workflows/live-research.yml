@@ -23,6 +23,8 @@ jobs:
       - run: python scripts/full_source_sweep.py
       - name: Run all eight query rounds through public search RSS
         run: python -m aftertone.full_research --mode bing-rss --output artifacts/eight-round
+      - name: Capture full text from approved hosts and create evidence candidates
+        run: python -m aftertone.capture --root artifacts/eight-round --limit 12
       - name: Upload real HTTP audit
         if: always()
         uses: actions/upload-artifact@v4
