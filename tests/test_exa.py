@@ -1,4 +1,4 @@
-import unittest
+import unittest,json
 from aftertone.exa import parse_mcporter,search
 class ExaTests(unittest.TestCase):
  def test_parse_real_response_shape(self):
@@ -9,6 +9,6 @@ class ExaTests(unittest.TestCase):
  def test_server_error_not_fake_hit(self):
   self.assertEqual(parse_mcporter({"content":[{"type":"text","text":"Rate limited, no results."}]}),[])
  def test_runner(self):
-  out=search("music",runner=lambda cmd: '{"content":[{"type":"text","text":"Title: Interview\\\\nURL: https://daily.bandcamp.com/a\\\\nPublished: 2018"}]}')
+  out=search("music",runner=lambda cmd: json.dumps({"content":[{"type":"text","text":"Title: Interview\nURL: https://daily.bandcamp.com/a\nPublished: 2018"}]}))
   self.assertEqual(len(out),1)
 if __name__=="__main__":unittest.main()
