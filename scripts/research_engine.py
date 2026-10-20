@@ -44,7 +44,7 @@ class VisibleText(HTMLParser):
 
 def extract_document(source):
     parser=VisibleText();parser.feed(source)
-    return re.sub(r"\\s+"," "," ".join(parser.parts)).strip()
+    return re.sub(r"\s+"," "," ".join(parser.parts)).strip()
 
 def evidence(url,text,publisher,role):
     normalized=canonical(url)
